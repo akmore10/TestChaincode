@@ -17,17 +17,18 @@ export class StudentContract extends Contract {
     // public name : string;
     // public rollno : number;
     // public marks:number[] ; 
-    public async createMyAsset(ctx: Context, studentId: string, name: string,rollno:number,marks :number,locationObj:LocationObject ): Promise<void> {
+    public async createMyAsset(ctx: Context, studentId:string, studentObject:Student ): Promise<void> {
+        // studentId: string, name: string,rollno:number,marks :number,locationObj:LocationObject
         const exists: boolean = await this.studentExists(ctx, studentId);
         if (exists) {
             throw new Error(`The my asset ${studentId} already exists`);
         }
-        const studentObj = new Student();
-        studentObj.name = name;
-        studentObj.rollno = Number(rollno);
-        studentObj.marks = [Number(marks)];
-        studentObj.locationObj = [locationObj];
-        const buffer: Buffer = Buffer.from(JSON.stringify(studentObj));
+        // const studentObj = new Student();
+        // studentObj.name = name;
+        // studentObj.rollno = Number(rollno);
+        // studentObj.marks = [Number(marks)];
+        // studentObj.locationObj = [locationObj];
+        const buffer: Buffer = Buffer.from(JSON.stringify(studentObject));
         await ctx.stub.putState(studentId, buffer);
     }
 
@@ -41,7 +42,7 @@ export class StudentContract extends Contract {
             throw new Error(`The my asset ${studentId} does not exist`);
         }
         const data: Uint8Array = await ctx.stub.getState(studentId);
-        let student: Student = JSON.parse(data.toString());
+        let student: Student = JSON.parse(data.toString()) as Student;
         return student;
     }
 
@@ -115,9 +116,9 @@ export class StudentContract extends Contract {
         // console.log("This is a name from : " + studentId + student.name);
         // student.marks = [...student.marks,...semMarks];
 
-        studentObj.locationObj = studentObj.locationObj.map((l)=>{
-            if(l["id"] == locObjId){
-                l["latitude"] = latitude;      
+        studentObj.locationObj = studentObj.locationObj.map((l: LocationObject)=>{
+            if(l.id == locObjId){
+                l.latitude = latitude;      
             }
             return l;
         });
