@@ -17,18 +17,14 @@ export class StudentContract extends Contract {
     // public name : string;
     // public rollno : number;
     // public marks:number[] ; 
-    public async createMyAsset(ctx: Context, studentId:string, studentObject:Student ): Promise<void> {
-        // studentId: string, name: string,rollno:number,marks :number,locationObj:LocationObject
+    public async createMyAsset(ctx: Context, studentId: string, studentObj : Student ): Promise<void> {
         const exists: boolean = await this.studentExists(ctx, studentId);
         if (exists) {
             throw new Error(`The my asset ${studentId} already exists`);
         }
-        // const studentObj = new Student();
-        // studentObj.name = name;
-        // studentObj.rollno = Number(rollno);
-        // studentObj.marks = [Number(marks)];
-        // studentObj.locationObj = [locationObj];
-        const buffer: Buffer = Buffer.from(JSON.stringify(studentObject));
+        let student  : Student = JSON.parse(JSON.stringify(studentObj));
+        // let buffer: Buffer = Buffer.from(JSON.stringify(student));
+        let buffer: Buffer = Buffer.from(student);
         await ctx.stub.putState(studentId, buffer);
     }
 
@@ -41,8 +37,22 @@ export class StudentContract extends Contract {
         if (!exists) {
             throw new Error(`The my asset ${studentId} does not exist`);
         }
-        const data: Uint8Array = await ctx.stub.getState(studentId);
+        // let data: Uint8Array = await ctx.stub.getState(studentId);
+        // let student: Student = JSON.parse(data.toString()) as Student;
+
+        let data: Uint8Array = await ctx.stub.getState(studentId);
         let student: Student = JSON.parse(data.toString()) as Student;
+        return student;
+    }
+
+    public async read(ctx: Context, studentId: string): Promise<Student> {
+        const exists: boolean = await this.studentExists(ctx, studentId);
+        if (!exists) {
+            throw new Error(`The my asset ${studentId} does not exist`);
+        }
+        let data: Uint8Array = await ctx.stub.getState(studentId);
+        let student: Student = JSON.parse(data.toString());
+
         return student;
     }
 
@@ -53,7 +63,7 @@ export class StudentContract extends Contract {
         }
         const data: Uint8Array = await ctx.stub.getState(studentId);
         let student: Student = JSON.parse(data.toString()) as Student;
-        
+        console.log(student);    
         return student.locationObj;
     }
 
@@ -64,15 +74,11 @@ export class StudentContract extends Contract {
             throw new Error(`The my asset ${studentId} does not exist`);
 
         }
-        const studentAsBytes = await ctx.stub.getState(studentId);
-        const student : Student  = JSON.parse(studentAsBytes.toString()) as Student;
-        
+        let student :Student = await this.readMyAsset(ctx,studentId);
         // semMarks = JSON.parse(semMarks.toString());
         // console.log("This is a name from : " + studentId + student.name);
         // student.marks = [...student.marks,...semMarks];
-        locationObj = JSON.parse(JSON.stringify(locationObj)) as LocationObject;
-        student.locationObj.push(locationObj);
-
+        student.locationObj = [ ...student.locationObj ,JSON.parse(locationObj+"")];
         await ctx.stub.putState(studentId,Buffer.from(JSON.stringify(student)));
 
         console.log('================ End update the Student ==================')
@@ -94,36 +100,36 @@ export class StudentContract extends Contract {
         // semMarks = JSON.parse(semMarks.toString());
         // console.log("This is a name from : " + studentId + student.name);
         // student.marks = [...student.marks,...semMarks];
+        
         console.log(studenObj);
         studenObj.marks.push(Number(semMarks));
-        
-
         await ctx.stub.putState(studentId,Buffer.from(JSON.stringify(studenObj)));
 
         console.log('================ End update the Student ==================')
         
     }
-    public async udpateInLoactionObject(ctx: Context, studentId: string,locObjId:string, latitude : number): Promise<void> {
+    public async udpateInLoactionObject(ctx: Context, studentId: string,locObjId:string, latitude : number): Promise<Student> {
         const exists: boolean = await this.studentExists(ctx, studentId);
         if (!exists) {
             throw new Error(`The my asset ${studentId} does not exist`);
 
         }
-        let studentAsBytes = await ctx.stub.getState(studentId);
-        let studentObj : Student  = JSON.parse(studentAsBytes.toString()) as Student;
-        
+        let student :Student = await this.readMyAsset(ctx,studentId);
+        latitude = Number(latitude);
         // semMarks = JSON.parse(semMarks.toString());
         // console.log("This is a name from : " + studentId + student.name);
         // student.marks = [...student.marks,...semMarks];
+        console.log("==================================================");
+        console.log("This is inside the updateLocationList");
 
-        studentObj.locationObj = studentObj.locationObj.map((l: LocationObject)=>{
+        student.locationObj = student.locationObj.map((l)=>{
+            console.log(l.latitude);
             if(l.id == locObjId){
                 l.latitude = latitude;      
             }
             return l;
         });
 
-        console.log(studentObj.locationObj[1] + "This is shitest");
         console.log("==================================================");
         
         // for(var i = 0 ; i < studentObj.locationObj.length;i++){
@@ -133,8 +139,8 @@ export class StudentContract extends Contract {
         //     console.log(studentObj.locationObj[i]);
         // 
     
-        await ctx.stub.putState(studentId,Buffer.from(JSON.stringify(studentObj)));
-
+        await ctx.stub.putState(studentId,Buffer.from(JSON.stringify(student)));
+        return student;
         console.log('================ End update the Student ==================')
         
     }
