@@ -1,6 +1,6 @@
 {
   "name": "LearningTypeScript",
-  "version": "0.0.91",
+  "version": "0.0.120",
   "description": "My Smart Contract",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",

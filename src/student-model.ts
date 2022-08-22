@@ -13,3 +13,18 @@ export class Student {
 
     
 }
+
+// {
+//     "id" : 1,
+//     "name" : "Akhilesh",
+//     "rollNo" : 9091,
+//     "marks" : [1,2,3,4],
+//     "locationObj" : [
+//         {
+//             "id" : "1",
+//             "latitude" : 10,
+//             "longitude" : 10,
+//             "address" : "aadsdf",
+//         }
+//     ]
+// }
