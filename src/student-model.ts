@@ -28,3 +28,10 @@ export class Student {
 //         }
 //     ]
 // }
+
+// {
+//     "id" : "1",
+//     "latitude" : 10,
+//     "longitude" : 10,
+//     "address" : "aadsdf",
+// }

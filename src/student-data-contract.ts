@@ -151,6 +151,25 @@ export class StudentContract extends Contract {
         }
         await ctx.stub.deleteState(studentId);
     }
-    
 
+    public async getHistory(ctx:Context,studentId:string):Promise<any>{
+        const promiseOfIterator = ctx.stub.getHistoryForKey(studentId);
+
+        const results = [];
+        for await (const keyMod of promiseOfIterator) {
+    
+            const resp = {
+                timestamp: keyMod.timestamp,
+                txid: keyMod.txId,
+                data : ""
+            }
+            if (keyMod.isDelete) {
+                resp.data = 'KEY DELETED';
+            } else {
+                resp.data = keyMod.value.toString();
+            }
+            results.push(resp);
+        }
+        return results;
+    }
 }
